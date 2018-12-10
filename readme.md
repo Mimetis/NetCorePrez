@@ -1,7 +1,5 @@
 # What's new in .NET CORE Platform
 
-[https://github.com/igoravl/insiders-devtour](https://github.com/igoravl/insiders-devtour)
-
 ## Demo 01 : globaljson.json config file
 
 Show multiple command lines available from `dotnet` CLI:
