@@ -1,0 +1,70 @@
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" TreatAsLocalProperty="PublishDir">
+  <Target Name="ValidateSingleFile" BeforeTargets="PrepareForPublish">
+    <Error Condition="'$(RuntimeIdentifier)' == ''" Text="SingleFile can only be specified when RuntimeIdentifier is specified." />
+  </Target>
+  <Target Name="ChangePublishDir" AfterTargets="PrepareForPublish">    
+    <PropertyGroup>
+      <_actualPublishDir>$(PublishDir)</_actualPublishDir>
+      <!-- redefine publishdir to be full.publish-->
+      <PublishDir />
+      <PublishDir Condition="'$(PublishDir)' == '' and
+                             '$(AppendRuntimeIdentifierToOutputPath)' != 'true' and
+                             '$(RuntimeIdentifier)' != '' and
+                             '$(_UsingDefaultRuntimeIdentifier)' != 'true'">$(OutputPath)$(RuntimeIdentifier)\full.$(PublishDirName)\</PublishDir>
+      <PublishDir Condition="'$(PublishDir)' == ''">$(OutputPath)full.$(PublishDirName)\</PublishDir>
+    </PropertyGroup>
+    <MakeDir Directories="$(PublishDir)" />
+  </Target>
+
+  <PropertyGroup>
+    <!--<SingleFileMode>fake</SingleFileMode>-->
+    <SingleFileMode>bundle</SingleFileMode>
+  </PropertyGroup>
+
+  <!--<Target Name="FakeRedirectPublish" BeforeTargets="Publish">-->
+  <Target Name="FakeRedirectPublish" 
+          Condition="'$(SingleFileMode)' == 'fake'"
+          BeforeTargets="Publish">
+    <PropertyGroup>
+      <_singleFileSource>$(IntermediateOutputPath)singleFileShim.cs</_singleFileSource>
+      <_fxDir>$(SystemRoot)\Microsoft.NET\Framework\v4.0.30319\</_fxDir>
+    </PropertyGroup>
+    <ItemGroup>
+      <_actualPublishedExe Include="$(PublishDir)$(TargetName).exe" />
+    </ItemGroup>
+    
+    <!-- Customize and copy redirect EXE-->
+    <WriteLinesToFile Lines='class Program { static void Main(string[] args) { System.Diagnostics.Process.Start(@"%(_actualPublishedExe.FullPath)", "\"" + string.Join("\" \"", args) + "\"")%3B } }'
+                      File="$(_singleFileSource)"
+                      Overwrite="true" />
+
+    <Csc Sources="$(_singleFileSource)"
+         OutputAssembly="$(_actualPublishDir)$(TargetName).exe"
+         References="$(_fxDir)mscorlib.dll;$(_fxDir)\System.dll"
+         TargetType="$(OutputType)"
+         NoLogo="true" />
+
+    <!-- revert the property so that we get the right log message -->
+    <PropertyGroup>
+      <PublishDir>$(_actualPublishDir)</PublishDir>
+    </PropertyGroup>
+  </Target>
+  
+  <Target Name="BundlePublish"
+          Condition="'$(SingleFileMode)' == 'bundle'"
+          BeforeTargets="Publish">
+
+    <PropertyGroup>
+      <_singleFileHost>$(MSBuildThisFileDirectory)$(PlatformTarget)\$(OutputType)\CoreRun.exe</_singleFileHost>
+    </PropertyGroup>
+
+    <Error Condition="!Exists('$(_singleFileHost)')" Text="Could not find single file host for this configuration: $(PlatformTarget)\$(OutputType)" />
+
+    <Exec Command="&quot;$(MSBuildThisFileDirectory)$(PlatformTarget)\bundle.exe&quot; -a &quot;$(TargetName)$(TargetExt)&quot; -h &quot;$(_singleFileHost)&quot; -r &quot;$(PublishDir.TrimEnd('\'))&quot; -o &quot;$(_actualPublishDir)$(TargetName).exe&quot;" />
+    
+    <!-- revert the property so that we get the right log message -->
+    <PropertyGroup>
+      <PublishDir>$(_actualPublishDir)</PublishDir>
+    </PropertyGroup>
+  </Target>
+</Project>

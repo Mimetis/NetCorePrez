@@ -1,0 +1,23 @@
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="ReplaceHost" 
+          Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(SelfContained)' == 'true' and '$(RuntimeIdentifier)' != '' and '$(OutputType)' == 'WinExe'" 
+          BeforeTargets="_ComputeNETCoreBuildOutputFiles">
+      <ItemGroup>
+          <_restoredAppHost Include="@(NativeCopyLocalItems)"
+                            Condition="'%(NativeCopyLocalItems.FileName)%(NativeCopyLocalItems.Extension)' == '$(_DotNetAppHostExecutableName)'"/>
+      </ItemGroup>
+      
+      <Error Condition="'@(_restoredAppHost->Count())' != 1"
+             Text="Could not locate '$(_DotNetAppHostExecutableName)'." />
+      
+      <PropertyGroup>
+        <_restoredAppHostPath>%(_restoredAppHost.FullPath)</_restoredAppHostPath>
+        <_restoredAppHostPackagePath>$(_restoredAppHostPath.SubString($(_restoredAppHostPath.LastIndexOf("runtimes\"))))</_restoredAppHostPackagePath>
+      </PropertyGroup>
+      
+      <ItemGroup>
+        <NativeCopyLocalItems Remove="@(_restoredAppHost)" />
+        <NativeCopyLocalItems Include="@(_restoredAppHost->'$(MSBuildThisFileDirectory)$(_restoredAppHostPackagePath)')" />
+      </ItemGroup>
+  </Target>
+</Project>

@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <RootNamespace>Company.ConsoleApplication1</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.DesktopUI" />
+    <Reference Include="C:\Program Files (x86)\Progress\Telerik UI for WinForms R2 2018\Bin\*.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\GaugeNetFX46\Form1.cs" Link="Form1.cs" />
+    <Compile Include="..\GaugeNetFX46\Form1.Designer.cs" Link="Form1.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="..\GaugeNetFX46\Form1.resx" Link="Form1.resx" />
+  </ItemGroup>
+
+</Project>
