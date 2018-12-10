@@ -1,5 +1,7 @@
 # What's new in .NET CORE Platform
 
+Slides available here : [https://www.slideshare.net/sebastienpertus/codeurs-en-seine-microsoft-net-core-plaform](https://www.slideshare.net/sebastienpertus/codeurs-en-seine-microsoft-net-core-plaform)
+
 ## Demo 01 : globaljson.json config file
 
 Show multiple command lines available from `dotnet` CLI:
